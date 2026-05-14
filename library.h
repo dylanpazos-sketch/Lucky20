@@ -1,0 +1,6 @@
+#ifndef PROYECTO_FINAL_LIBRARY_H
+#define PROYECTO_FINAL_LIBRARY_H
+
+void hello(void);
+
+#endif // PROYECTO_FINAL_LIBRARY_H
