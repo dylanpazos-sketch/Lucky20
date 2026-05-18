@@ -76,3 +76,23 @@ int Barajear(int mazo[],int total)
         mazo[j] = temporal;
     }
 }
+
+int MostrarFichas(char NombreArchivo[])
+{
+    FILE *Archivo = fopen(NombreArchivo,"rb");
+    int ficha[3];
+
+    if (Archivo == NULL)
+    {
+        printf("Error al abrir algun archivo");
+        return 1;
+    }
+    printf("Fichas de %s",NombreArchivo);
+
+    while (fread(ficha,sizeof(int),3,Archivo));
+    {
+        printf("[%d|%d]",ficha[1],ficha[2]);
+    }
+
+    fclose(Archivo);
+}
