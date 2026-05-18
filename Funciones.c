@@ -35,4 +35,6 @@ int SetDeDomino(FILE *SET, int set)
             ID++;
         }
     }
+
+    int Repartir()
 }

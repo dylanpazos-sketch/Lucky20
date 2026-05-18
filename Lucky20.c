@@ -16,5 +16,5 @@ int main()
     SET = fopen("setdefichas.bin", "wb");
     SetDeDomino(SET, set);
     fclose(SET);
-
+return 0;
 }
