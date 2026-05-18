@@ -71,7 +71,6 @@ int main()
 
             MostrarFichas(nombres[0]);
 
-
         }
         else if (opcion == 2)
         {

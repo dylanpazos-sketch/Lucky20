@@ -96,3 +96,4 @@ int MostrarFichas(char NombreArchivo[])
 
     fclose(Archivo);
 }
+
