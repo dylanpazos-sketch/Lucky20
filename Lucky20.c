@@ -43,16 +43,16 @@ int main()
             fclose(SET);
 
             printf("De cuantos jugadores sera esta ronda?\n");
-            printf("[1] Solitario");
-            printf("[2] Dos jugadores");
-            printf("[3] Tres jugadores");
-            printf("[4] Cuatro jugadores");
+            printf("[1] Solitario\n");
+            printf("[2] Dos jugadores\n");
+            printf("[3] Tres jugadores\n");
+            printf("[4] Cuatro jugadores\n");
             scanf("%d", &jugadores);
 
             char NombreJugadores[jugadores][100];
             for (int i = 0; i < jugadores; i++)
             {
-                printf("Ingrese el nombre del jugador");
+                printf("Ingrese el nombre del jugador:\n");
                 scanf("%s", NombreJugadores[i]);
             }
 
@@ -104,7 +104,7 @@ int main()
                 printf("\n[a] Formar par(suma 20)");
                 printf("\n[b] Pedir 4 fichasdel banco");
                 printf("\n[c] Retirarse de la partida");
-                printf("\n[d] Guardar y pausar partida");
+                printf("\n[d] Guardar y pausar partida\n");
                 printf("Selecciona una opcion:\n");
 
                 char seleccion;
@@ -137,13 +137,13 @@ int main()
 
                 if (ContarFichas(nombres[Turno]) == 0)
                 {
-                    printf("Felizidades, %s ah ganado la partida",nombres[Turno]);
+                    printf("\nFelizidades, %s ah ganado la partida",nombres[Turno]);
                     GuardarGanadorBinario(NombreJugadores[Turno], paresPorJugador[Turno]);
                     partida = 0;
                 }
                 else if (activos == 0)
                 {
-                    printf("Todos los jugadores se retiraron, la partida termino");
+                    printf("\nTodos los jugadores se retiraron, la partida termino");
                     partida = 0;
                 }
                 else if (ContarFichas("Banco.bin") == 0 )
@@ -184,7 +184,7 @@ int main()
         }
     }
 
-    printf("Gracias por jugar Lucky20.\n");
+    printf("\nGracias por jugar Lucky20.\n");
     printf("Creditos:Profe cecy");
 return 0;
 }
