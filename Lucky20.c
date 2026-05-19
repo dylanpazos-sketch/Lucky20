@@ -5,7 +5,7 @@
 
 int main()
 {
-    int set, jugadores, CID, opcion,opcion2;
+    int set, jugadores, CID, opcion,opcion2, partida = 1;
     FILE *SET;
     FILE *BANCO;
     FILE *J1, *J2, *J3, *J4;
@@ -40,6 +40,13 @@ int main()
             printf("[4] Cuatro jugadores");
             scanf("%d", &jugadores);
 
+            char NombreJugadores[jugadores][100];
+            for (int i = 0; i < jugadores; i++)
+            {
+                printf("Ingrese el nombre del jugador");
+                scanf("%s", NombreJugadores[i]);
+            }
+
             int listaID[Fichas];
             for(int i = 0; i < Fichas; i++)
             {
@@ -69,7 +76,72 @@ int main()
             }
             printf("Fichas repartidas con exito.\n");
 
-            MostrarFichas(nombres[0]);
+            int JugadoresRet[4] = {0,0,0,0};
+            int Turno = 0;
+            int activos = jugadores;
+            while (partida)
+            {
+                if (JugadoresRet[Turno] == 1)
+                {
+                    Turno = (Turno + 1) % jugadores;
+                    continue;
+                }
+                printf("\nTurno del jugador: %s",NombreJugadores[Turno]);
+                printf("\nFichas en el Banco:%d",FichasBanco());
+                    MostrarFichas(NombreJugadores[Turno]);
+
+                printf("\nQue decea hacer?");
+                printf("\n[a] Formar par(suma 20)");
+                printf("\n[b] Pedir 4 fichasdel banco");
+                printf("\n[c] Retirarse de la partida\n");
+                printf("Selecciona una opcion:\n");
+                char seleccion;
+                scanf("%c", &seleccion);
+
+                if (seleccion == 'a')
+                {
+                    PonerDos(NombreJugadores[Turno]);
+                }
+                else if (seleccion == 'b')
+                {
+                    TomarDelBanco(NombreJugadores[Turno]);
+                }
+                else if (seleccion == 'c')
+                {
+                    JugadoresRet[Turno] = 1;
+                    activos--;
+                    printf("El jugador %s se ah retirado\n");
+                }
+
+                if (ContarFichas(NombreJugadores[Turno]) == 0)
+                {
+                    printf("Felizidades, %s ah ganado la partida",nombres[Turno]);
+                    partida = 0;
+                }
+                else if (activos == 0)
+                {
+                    printf("Todos los jugadores se retiraron, la partida termino");
+                    partida = 0;
+                }
+                else if (ContarFichas("Banco.bin") == 0 )
+                {
+                    int alguienPuedeMover = 0;
+                    for ( int i = 0; i < jugadores; i++ )
+                    {
+                        if (JugadoresRet[i] == 0 && PoderSeguirMoviendo(nombres[i]));
+                        alguienPuedeMover = 1;
+                        break;
+                    }
+                    if (alguienPuedeMover == 0) {
+                        printf("\nDERROTA: No hay fichas en el banco ni movimientos posibles.\n");
+                        partida = 0;
+                    }
+                }
+                if (partida != 0 )
+                {
+                    Turno = (Turno + 1) % jugadores;
+                }
+            }
 
         }
         else if (opcion == 2)
