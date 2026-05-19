@@ -3,7 +3,7 @@
 #include<stdlib.h>
 #include<string.h>
 
-int SetDeDomino(FILE *SET, int set)
+int SetDeDomino(int set)
 {
     int ficha[3];
     int parametro, NumDeFichas;
@@ -25,7 +25,7 @@ int SetDeDomino(FILE *SET, int set)
         NumDeFichas = 91;
     }
 
-    SET = fopen("setdefichas.bin","wb");
+    FILE *SET = fopen("setdefichas.bin","wb");
 
     for (int i = 0; i <= parametro; i++)
     {
@@ -40,6 +40,7 @@ int SetDeDomino(FILE *SET, int set)
             ID++;
         }
     }
+    fclose(SET);
 
     return NumDeFichas;
 }
@@ -82,6 +83,7 @@ int MostrarFichas(char NombreArchivo[])
 {
     FILE *Archivo = fopen(NombreArchivo,"rb");
     int ficha[3];
+    int i = 1;
 
     if (Archivo == NULL)
     {
@@ -92,30 +94,35 @@ int MostrarFichas(char NombreArchivo[])
 
     while (fread(ficha,sizeof(int),3,Archivo))
     {
-        printf("[%d|%d]",ficha[1],ficha[2]);
+        printf("\n%d-[%d|%d] ",i,ficha[1],ficha[2]);
+        i++;
     }
 
     fclose(Archivo);
+    return 0;
 }
 
-int SumaFicha(int caraA, int caraB,int PuntosFaltantes)
-{
-    if (caraA != 0 && caraB != 0)
+int SumaFicha(int f1a, int f1b, int f2a, int f2b) {
+    int ceros = 0;
+    if (f1a == 0) ceros++;
+    if (f1b == 0) ceros++;
+    if (f2a == 0) ceros++;
+    if (f2b == 0) ceros++;
+
+    int sumaCaras = f1a + f1b + f2a + f2b;
+
+    if (ceros == 0)
     {
-        return caraA + caraB;
-    }
-    if (caraA == 0 || caraB == 0)
+        return sumaCaras;
+    } else
     {
-        int valor;
-        if (caraA == 0)
+        if (sumaCaras <= 20)
         {
-            valor =caraB;
-        }
-        else
+            return 20;
+        } else
         {
-            valor = caraA;
+            return sumaCaras;
         }
-        return valor + PuntosFaltantes;
     }
 }
 
@@ -222,10 +229,7 @@ int PonerDos(char NombreJugador[])
     int f2a = mano[pos2-1][1];
     int f2b = mano[pos2-1][2];
 
-    int sumaF1 = f1a + f1b;
-    int faltante = 20 - sumaF1;
-
-    if (SumaFicha(f2a, f2b, faltante) == 20)
+    if (SumaFicha(f1a, f1b, f2a, f2b) == 20)
     {
         f = fopen(NombreJugador, "wb");
         for(int i = 0; i < total; i++) {
@@ -238,7 +242,7 @@ int PonerDos(char NombreJugador[])
         return 1;
     }
     else {
-        printf("\nEse par no suma 20. Intenta con otras.\n");
+        printf("\nEse par no suma 20. Suma actual: %d. Intenta con otras.\n", (f1a+f1b+f2a+f2b));
         return 0;
     }
 }
@@ -267,7 +271,7 @@ int PoderSeguirMoviendo(char NombreJugador[])
 
             int sumaF1 = f1a + f1b;
             int faltante = 20 - sumaF1;
-            if (SumaFicha(f2a, f2b, faltante) == 20)
+            if (SumaFicha(f1a, f1b, f2a, f2b) == 20)
             {
                 return 1;
             }
@@ -339,3 +343,21 @@ void RegistrarMovimiento(char archivoPartida[], char nombreJug[], int f1[], int 
 
     fclose(f);
 }
+
+void ActivarModoPrueba(char nombreArchivo[]) {
+
+    int fichasPrueba[6][3] = {
+        {101, 5, 5}, {102, 5, 5},
+        {103, 6, 4}, {104, 5, 5},
+        {105, 0, 5}, {106, 8, 7}
+    };
+
+    FILE *f = fopen(nombreArchivo, "wb");
+    if (f != NULL) {
+        for (int i = 0; i < 6; i++) {
+            fwrite(fichasPrueba[i], sizeof(int), 3, f);
+        }
+        fclose(f);
+    }
+}
+

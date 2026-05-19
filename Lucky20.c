@@ -6,7 +6,7 @@
 
 int main()
 {
-    int set, jugadores, CID, opcion,opcion2;
+    int set, jugadores, opcion;
     FILE *SET;
     FILE *BANCO;
     FILE *J1, *J2, *J3, *J4;
@@ -38,7 +38,7 @@ int main()
             scanf("%d", &set);
 
             SET = fopen("setdefichas.bin", "wb");
-            int Fichas = SetDeDomino(SET, set);
+            int Fichas = SetDeDomino(set);
 
             fclose(SET);
 
@@ -50,20 +50,36 @@ int main()
             scanf("%d", &jugadores);
 
             char NombreJugadores[jugadores][100];
+            int FActual = 0;
+            int listaID[Fichas];
+
             for (int i = 0; i < jugadores; i++)
             {
                 printf("Ingrese el nombre del jugador:\n");
                 scanf("%s", NombreJugadores[i]);
+
+                FILE *temp = fopen(nombres[i], "wb");
+                fclose(temp);
+
+                if (strcmp(NombreJugadores[i], "admin") == 0) {
+                    ActivarModoPrueba(nombres[i]);
+                    printf("¡MODO PRUEBA ACTIVADO PARA %s!\n", NombreJugadores[i]);
+                } else {
+                    // Reparto normal (7 fichas)
+                    for (int k = 0; k < 6; k++) {
+                        EntregaFichas(listaID[FActual], nombres[i]);
+                        FActual++;
+                    }
+                }
             }
 
-            int listaID[Fichas];
             for(int i = 0; i < Fichas; i++)
             {
                 listaID[i] = i+1;
             }
             Barajear(listaID, Fichas);
 
-            int FActual = 0;
+
             for (int j = 0; j < jugadores; j++ )
             {
                 FILE *temp=fopen(nombres[j], "wb");
@@ -97,7 +113,7 @@ int main()
                     continue;
                 }
                 printf("\nTurno del jugador: %s",NombreJugadores[Turno]);
-                printf("\nFichas en el Banco:%d",FichasBanco());
+                printf("\nFichas en el Banco:%d\n",FichasBanco());
                 MostrarFichas(nombres[Turno]);
 
                 printf("\nQue decea hacer?");
