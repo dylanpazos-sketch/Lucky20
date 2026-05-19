@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<time.h>
 #include<stdlib.h>
+#include<string.h>
 
 int SetDeDomino(FILE *SET, int set)
 {
@@ -159,22 +160,33 @@ int TomarDelBanco(char nombreJugador[])
         Robar = 4;
     }
 
-    for (int i = 0; i < Robar; i++)
+    if (Robar == 0)
     {
-        FILE *fBanco = fopen("Banco.bin","rb+");
-        FILE *fJugador = fopen(nombreJugador,"ab");
-        int ficha[3];
-
-        int TotalActual = ContarFichas("Banco.bin");
-        fseek(fBanco,(TotalActual - 1)*sizeof(int)*3,SEEK_SET);
-
-        fread(ficha,sizeof(int),3,fBanco);
-        fwrite(ficha,sizeof(int),3,fJugador);
-
-        fclose(fBanco);
-        fclose(fJugador);
+        printf("\nEl banco esta bacio");
+        return 0;
     }
-    printf("Has recibido %d fichas nuevas", Robar);
+
+    int manoTemporal[100][3];
+    FILE *fBanco = fopen("Banco.bin", "rb");
+    for (int i = 0; i < TotalBanco; i++) {
+        fread(manoTemporal[i], sizeof(int), 3, fBanco);
+    }
+    fclose(fBanco);
+
+    FILE *fJugador = fopen(nombreJugador, "ab");
+    for (int i = 0; i < Robar; i++) {
+        fwrite(manoTemporal[TotalBanco - 1 - i], sizeof(int), 3, fJugador);
+    }
+    fclose(fJugador);
+
+    fBanco = fopen("Banco.bin", "wb");
+    for (int i = 0; i < (TotalBanco - Robar); i++) {
+        fwrite(manoTemporal[i], sizeof(int), 3, fBanco);
+    }
+    fclose(fBanco);
+
+    printf("\nHas recibido %d fichas nuevas.\n", Robar);
+    return Robar;
 }
 
 int PonerDos(char NombreJugador[])
@@ -245,6 +257,7 @@ int PoderSeguirMoviendo(char NombreJugador[])
         fread(mano[i], sizeof(int), 3, f);
     }
     fclose(f);
+
     for (int i = 0; i < total; i++)
     {
         for (int j = i + 1; j < total; j++)
@@ -252,19 +265,77 @@ int PoderSeguirMoviendo(char NombreJugador[])
             int f1a = mano[i][1], f1b = mano[i][2];
             int f2a = mano[j][1], f2b = mano[j][2];
 
-            int sumaPuntosFijos = f1a + f1b + f2a + f2b;
-
-            if (f1a != 0 && f1b != 0 && f2a != 0 && f2b != 0)
+            int sumaF1 = f1a + f1b;
+            int faltante = 20 - sumaF1;
+            if (SumaFicha(f2a, f2b, faltante) == 20)
             {
-                if (sumaPuntosFijos == 20) return 1;
-            }
-            else
-            {
-                if (sumaPuntosFijos <= 20)
-                {
-                    return 1;
-                }
+                return 1;
             }
         }
     }
+    return 0;
+}
+
+void GuardarPartida(int turno, int jugs, int st, int acts, int rets[], char nombresJugs[][100])
+{
+    FILE *f = fopen("guardado.dat", "wb");
+    if(!f) return;
+    fwrite(&turno, sizeof(int), 1, f);
+    fwrite(&jugs, sizeof(int), 1, f);
+    fwrite(&st, sizeof(int), 1, f);
+    fwrite(&acts, sizeof(int), 1, f);
+    fwrite(rets, sizeof(int), 4, f);
+    fwrite(nombresJugs, sizeof(char) * 100, jugs, f);
+    fclose(f);
+    printf("\nPartida guardada. Puedes continuar despues.\n");
+}
+
+typedef struct {
+    char nombre[100];
+    int paresFormados;
+    char fecha[11];
+}
+RegistroGanador;
+
+void GuardarGanadorBinario(char nombre[], int pares)
+{
+    FILE *f = fopen("historico_ganadores.bin", "ab");
+    if (!f) return;
+
+    RegistroGanador reg;
+    strcpy(reg.nombre, nombre);
+    reg.paresFormados = pares;
+
+
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    sprintf(reg.fecha, "%02d/%02d/%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+
+    fwrite(&reg, sizeof(RegistroGanador), 1, f);
+    fclose(f);
+}
+
+void GenerarNombreArchivo(char nombreFinal[]) {
+    time_t t = time(NULL);
+    struct tm tm = *localtime(&t);
+    char base[50];
+    sprintf(base, "partida%02d%02d%d", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900);
+
+    sprintf(nombreFinal, "%s.bin", base);
+
+    int contador = 1;
+    while (fopen(nombreFinal, "rb") != NULL) {
+        sprintf(nombreFinal, "%s-%d.bin", base, contador);
+        contador++;
+    }
+}
+void RegistrarMovimiento(char archivoPartida[], char nombreJug[], int f1[], int f2[]) {
+    FILE *f = fopen(archivoPartida, "ab");
+    if (!f) return;
+
+    fwrite(nombreJug, sizeof(char), 100, f);
+    fwrite(f1, sizeof(int), 3, f);
+    fwrite(f2, sizeof(int), 3, f);
+
+    fclose(f);
 }

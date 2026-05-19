@@ -1,15 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include<stdlib.h>
+#include <string.h>
+#include <time.h>
 #include "library.h"
 
 int main()
 {
-    int set, jugadores, CID, opcion,opcion2, partida = 1;
+    int set, jugadores, CID, opcion,opcion2;
     FILE *SET;
     FILE *BANCO;
     FILE *J1, *J2, *J3, *J4;
+    FILE *Guardados;
     char nombres[5][20] = {"J1.bin", "J2.bin", "J3.bin", "J4.bin","Banco.bin"};
+    int paresPorJugador[4] = {0, 0, 0, 0};
 
     while (opcion != 3){
 
@@ -22,6 +25,12 @@ int main()
 
         if(opcion == 1)
         {
+            char nombreArchivoPartida[50];
+            GenerarNombreArchivo(nombreArchivoPartida);
+
+            FILE *crear = fopen(nombreArchivoPartida, "wb");
+            fclose(crear);
+
             printf("Selecciona un set de domino:\n");
             printf("[1] Set de 6\n");
             printf("[2] Set de 9\n");
@@ -79,6 +88,7 @@ int main()
             int JugadoresRet[4] = {0,0,0,0};
             int Turno = 0;
             int activos = jugadores;
+            int partida = 1;
             while (partida)
             {
                 if (JugadoresRet[Turno] == 1)
@@ -88,23 +98,29 @@ int main()
                 }
                 printf("\nTurno del jugador: %s",NombreJugadores[Turno]);
                 printf("\nFichas en el Banco:%d",FichasBanco());
-                    MostrarFichas(NombreJugadores[Turno]);
+                MostrarFichas(nombres[Turno]);
 
                 printf("\nQue decea hacer?");
                 printf("\n[a] Formar par(suma 20)");
                 printf("\n[b] Pedir 4 fichasdel banco");
-                printf("\n[c] Retirarse de la partida\n");
+                printf("\n[c] Retirarse de la partida");
+                printf("\n[d] Guardar y pausar partida");
                 printf("Selecciona una opcion:\n");
+
                 char seleccion;
+                getchar();
                 scanf("%c", &seleccion);
 
                 if (seleccion == 'a')
                 {
-                    PonerDos(NombreJugadores[Turno]);
+                    if (PonerDos(nombres[Turno]) == 1)
+                    {
+                        paresPorJugador[Turno]++;
+                    }
                 }
                 else if (seleccion == 'b')
                 {
-                    TomarDelBanco(NombreJugadores[Turno]);
+                    TomarDelBanco(nombres[Turno]);
                 }
                 else if (seleccion == 'c')
                 {
@@ -112,10 +128,17 @@ int main()
                     activos--;
                     printf("El jugador %s se ah retirado\n");
                 }
+                else if (seleccion == 'd')
+                {
+                    GuardarPartida(Turno, jugadores, set, activos, JugadoresRet, NombreJugadores);
+                    partida = 0;
+                    break;
+                }
 
-                if (ContarFichas(NombreJugadores[Turno]) == 0)
+                if (ContarFichas(nombres[Turno]) == 0)
                 {
                     printf("Felizidades, %s ah ganado la partida",nombres[Turno]);
+                    GuardarGanadorBinario(NombreJugadores[Turno], paresPorJugador[Turno]);
                     partida = 0;
                 }
                 else if (activos == 0)
@@ -128,9 +151,11 @@ int main()
                     int alguienPuedeMover = 0;
                     for ( int i = 0; i < jugadores; i++ )
                     {
-                        if (JugadoresRet[i] == 0 && PoderSeguirMoviendo(nombres[i]));
-                        alguienPuedeMover = 1;
-                        break;
+                        if (JugadoresRet[i] == 0 && PoderSeguirMoviendo(nombres[i]))
+                        {
+                            alguienPuedeMover = 1;
+                            break;
+                        }
                     }
                     if (alguienPuedeMover == 0) {
                         printf("\nDERROTA: No hay fichas en el banco ni movimientos posibles.\n");
@@ -142,11 +167,20 @@ int main()
                     Turno = (Turno + 1) % jugadores;
                 }
             }
-
         }
         else if (opcion == 2)
         {
-            printf("Proximamente... ");
+            FILE *f = fopen("historico_ganadores.bin", "rb");
+            if (!f) {
+                printf("\nNo hay registros todavia.\n");
+            } else {
+                RegistroGanador reg;
+                printf("\n--- HISTORIAL DE GANADORES ---\n");
+                while (fread(&reg, sizeof(RegistroGanador), 1, f)) {
+                    printf("Jugador: %s | Pares: %d | Fecha: %s\n", reg.nombre, reg.paresFormados, reg.fecha);
+                }
+                fclose(f);
+            }
         }
     }
 
