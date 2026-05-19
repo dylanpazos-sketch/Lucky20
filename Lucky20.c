@@ -57,20 +57,6 @@ int main()
             {
                 printf("Ingrese el nombre del jugador:\n");
                 scanf("%s", NombreJugadores[i]);
-
-                FILE *temp = fopen(nombres[i], "wb");
-                fclose(temp);
-
-                if (strcmp(NombreJugadores[i], "admin") == 0) {
-                    ActivarModoPrueba(nombres[i]);
-                    printf("¡MODO PRUEBA ACTIVADO PARA %s!\n", NombreJugadores[i]);
-                } else {
-                    // Reparto normal (7 fichas)
-                    for (int k = 0; k < 6; k++) {
-                        EntregaFichas(listaID[FActual], nombres[i]);
-                        FActual++;
-                    }
-                }
             }
 
             for(int i = 0; i < Fichas; i++)
@@ -79,27 +65,27 @@ int main()
             }
             Barajear(listaID, Fichas);
 
-
             for (int j = 0; j < jugadores; j++ )
             {
-                FILE *temp=fopen(nombres[j], "wb");
-                fclose(temp);
-
-                for (int k = 0; k < 6;k++ )
+                // Si el nombre es admin, activamos modo prueba y saltamos el reparto normal
+                if (strcmp(NombreJugadores[j], "admin") == 0)
                 {
-                    EntregaFichas(listaID[FActual],nombres[j] );
-                    FActual++;
+                    ActivarModoPrueba(nombres[j]);
+                    printf("\n¡MODO PRUEBA ACTIVADO PARA EL JUGADOR %d!\n", j+1);
+                }
+                else
+                {
+                    // Reparto normal solo si NO es admin
+                    FILE *temp = fopen(nombres[j], "wb");
+                    fclose(temp);
+
+                    for (int k = 0; k < 6; k++)
+                    {
+                        EntregaFichas(listaID[FActual], nombres[j]);
+                        FActual++;
+                    }
                 }
             }
-            FILE *tempB =fopen("Banco.bin", "wb");
-            fclose(tempB);
-
-            while(FActual < Fichas)
-            {
-                EntregaFichas(listaID[FActual],"Banco.bin");
-                FActual++;
-            }
-            printf("Fichas repartidas con exito.\n");
 
             int JugadoresRet[4] = {0,0,0,0};
             int Turno = 0;
